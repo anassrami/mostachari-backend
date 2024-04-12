@@ -4,3 +4,5 @@ pydantic
 pymongo
 pydantic-settings
 dotenv
+uvicorn
+fastapi

@@ -32,7 +32,7 @@ def create_user(user: UserCreate, db: Collection = Depends(get_database)):
 
 
 def get_user_by_username(username: str, db: Collection = Depends(get_database)) -> Optional[User]:
-    user_data = db['users'].find_one({"username": username}, {"_id": 1, "username": 1, "email": 1, "is_active": 1, "consultation_balance": 1})
+    user_data = db['users'].find_one({"username": username}, {"_id": 1, "username": 1, "email": 1, "is_active": 1, "consultation_balance": 1, "hashed_password": 1})
     if user_data:
         user_id = str(user_data.pop('_id'))  # Convert ObjectId to string and remove from user_data
         return User(id=user_id, **user_data)  # Create User instance using the retrieved data

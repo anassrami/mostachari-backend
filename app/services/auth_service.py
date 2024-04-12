@@ -25,7 +25,7 @@ def verify_token(token: str, credentials_exception, db):
 
 def authenticate_user(username: str, password: str, db):
     user = get_user_by_username(username, db)
-    if not user or not verify_password(pwd_context, password, user['hashed_password']):
+    if not user or not verify_password(pwd_context, password, user.hashed_password):
         return False
     return user
 

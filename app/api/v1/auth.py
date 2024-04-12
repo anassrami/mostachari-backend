@@ -25,16 +25,16 @@ def login_for_access_token(form_data: LoginData, db: Collection = Depends(get_da
 
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     access_token = create_access_token(
-        data={"sub": user["username"]}, expires_delta=access_token_expires
+        data={"sub": user.username}, expires_delta=access_token_expires
     )
 
     # Prepare user data for response, excluding sensitive information like hashed_password
     user_data = {
-        "id": str(user["_id"]),  # Convert ObjectId to string
-        "username": user["username"],
-        "email": user["email"],
-        "consultation_balance": user.get("consultation_balance", 0),  # Provide a default value if key doesn't exist
-        "is_active": user.get("is_active", True)  # Provide a default value if key doesn't exist
+        "id": str(user.id),  # Convert ObjectId to string
+        "username": user.username,
+        "email": user.email,
+        "consultation_balance": user.consultation_balance,  # Provide a default value if key doesn't exist
+        "is_active": user.is_active  # Provide a default value if key doesn't exist
     }
 
     return {

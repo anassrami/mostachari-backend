@@ -17,6 +17,7 @@ class User(UserBase):
     id: str
     is_active: bool
     consultation_balance: int
+    hashed_password: str
     class Config:
         from_attributes = True
 

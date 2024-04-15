@@ -1,4 +1,5 @@
 # In dependencies.py
+from fastapi import HTTPException, Request
 from pymongo import MongoClient
 from contextlib import contextmanager
 from app.settings import settings
@@ -12,3 +13,8 @@ def get_database():
         yield db
     finally:
         client.close()
+        
+async def user_data_authorization(request: Request, username: str):
+    if username and request.state.user != username:
+        raise HTTPException(status_code=403, detail="Not authorized to access this user's data")
+    return True

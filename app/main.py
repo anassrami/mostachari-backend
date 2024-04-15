@@ -10,6 +10,9 @@ from app.settings import settings
 from app.api.v1 import auth, user
 from app.dependencies import get_database
 from app.services.auth_service import verify_token
+from fastapi import Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
+from jose import jwt, JWTError
 
 app = FastAPI()
 db_client = None
@@ -23,6 +26,24 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Collection = Depen
     )
     return verify_token(token, credentials_exception, db)
 
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        token = request.headers.get("Authorization")
+        if token:
+            try:
+                token = token.split(" ")[1]  # Assuming Bearer token
+                payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+                request.state.user = payload.get("sub")
+            except JWTError:
+                return Response(status_code=401, content="Invalid token")
+            except Exception as e:
+                return Response(status_code=401, content=str(e))
+
+        response = await call_next(request)
+        return response
+
+
 # Middleware setup
 app.add_middleware(
     CORSMiddleware,
@@ -31,6 +52,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Apply the middleware
+app.add_middleware(AuthMiddleware)
 
 # Including routers
 app.include_router(auth.router, prefix="/api/v1/auth")

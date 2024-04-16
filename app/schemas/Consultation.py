@@ -14,7 +14,6 @@ class ConsultationCreate(ConsultationBase):
 
 class Consultation(ConsultationBase):
     id: str
-    aiResponse: Optional[str] = None
     creationDate: datetime = Field(default_factory=datetime.utcnow)
 
     @validator('id', pre=True, allow_reuse=True)
@@ -27,3 +26,17 @@ class Consultation(ConsultationBase):
         orm_mode = True
         allow_population_by_field_name = True
 
+class ConsultationID(ConsultationBase):
+    id: str = Field(..., alias='_id')
+    aiResponse: Optional[str] = None
+    creationDate: datetime = Field(default_factory=datetime.utcnow)
+
+    @validator('id', pre=True, allow_reuse=True)
+    def convert_id(cls, v):
+        if isinstance(v, ObjectId):
+            return str(v)
+        return v
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True

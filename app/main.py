@@ -16,15 +16,6 @@ from jose import jwt, JWTError
 
 app = FastAPI()
 db_client = None
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
-
-def get_current_user(token: str = Depends(oauth2_scheme), db: Collection = Depends(get_database)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    return verify_token(token, credentials_exception, db)
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -57,7 +48,7 @@ app.add_middleware(AuthMiddleware)
 
 # Including routers
 app.include_router(auth.router, prefix="/api/v1/auth")
-app.include_router(user.router, prefix="/api/v1/user", dependencies=[Depends(get_current_user)])
+app.include_router(user.router, prefix="/api/v1/user")
 app.include_router(consultation.router, prefix="/api/v1")
 
 

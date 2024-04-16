@@ -37,5 +37,3 @@ def get_user_by_username(username: str, db: Collection = Depends(get_database)) 
         user_id = str(user_data.pop('_id'))  # Convert ObjectId to string and remove from user_data
         return User(id=user_id, **user_data)  # Create User instance using the retrieved data
     return None
-
-

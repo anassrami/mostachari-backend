@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.server_api import ServerApi
 from app.settings import settings
-from app.api.v1 import auth, user
+from app.api.v1 import auth, consultation, user
 from app.dependencies import get_database
 from app.services.auth_service import verify_token
 from fastapi import Request, Response
@@ -58,6 +58,7 @@ app.add_middleware(AuthMiddleware)
 # Including routers
 app.include_router(auth.router, prefix="/api/v1/auth")
 app.include_router(user.router, prefix="/api/v1/user", dependencies=[Depends(get_current_user)])
+app.include_router(consultation.router, prefix="/api/v1")
 
 
 @app.on_event("startup")

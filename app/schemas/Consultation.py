@@ -27,7 +27,7 @@ class Consultation(ConsultationBase):
         allow_population_by_field_name = True
 
 class ConsultationID(ConsultationBase):
-    id: str = Field(..., alias='_id')
+    id: str = Field(..., alias='id')
     aiResponse: Optional[str] = None
     creationDate: datetime = Field(default_factory=datetime.utcnow)
 
@@ -40,3 +40,4 @@ class ConsultationID(ConsultationBase):
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
+        json_encoders = {ObjectId: str}

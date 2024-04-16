@@ -68,8 +68,9 @@ def get_consultation_by_id(id, user_id: str, db: Collection):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No active consultation found.")    
 
 def delete_consultation(id, user_id: str, db: Collection):
-    if not is_valid_object_id(id):
-     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid consultation ID format.")
+    if not ObjectId.is_valid(id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid consultation ID format.")
+
     try:
         consultation = db['consultations'].find_one({"_id": ObjectId(id)})
         if consultation and consultation.get("user_id") == ObjectId(user_id):
@@ -79,10 +80,12 @@ def delete_consultation(id, user_id: str, db: Collection):
                 return_document=pymongo.ReturnDocument.AFTER
             )
             if result:
+                # Make sure to rename _id to id when passing to Pydantic
+                result['id'] = str(result.pop('_id'))
                 return ConsultationID(**result)  # Serialize result into Pydantic model
             else:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No active consultation found.")
         else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unauthorized access attempt.")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized access attempt.")
     except pymongo.errors.PyMongoError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No active consultation found.")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

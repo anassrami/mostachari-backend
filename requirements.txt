@@ -3,6 +3,8 @@ python-jose
 pydantic
 pymongo
 pydantic-settings
-dotenv
+python-dotenv>=0.19.0
 uvicorn
 fastapi
+fastapi_mail
+passlib

@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 from app.settings import settings
 from app.security.security import verify_password
 from app.services.user_service import get_user_by_username
-
+from fastapi import HTTPException, status
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -38,3 +38,21 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt
+
+def generate_password_reset_token(email: str):
+    expires_delta = timedelta(hours=1)
+    expire = datetime.utcnow() + expires_delta
+    to_encode = {"exp": expire, "sub": email}
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+
+
+def verify_password_reset_token(token: str) -> str:
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        return payload.get('sub')
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

@@ -21,6 +21,12 @@ class User(UserBase):
     class Config:
         from_attributes = True
 
+class UserDetails(UserBase):
+    is_active: bool
+    consultation_balance: int
+    class Config:
+        from_attributes = True
+
 class UserRegister(BaseModel):
     username: str
     email: EmailStr

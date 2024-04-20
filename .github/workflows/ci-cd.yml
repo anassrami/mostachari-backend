@@ -49,6 +49,7 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         password: ${{ secrets.SERVER_PASSWORD }}
         script: |
-          docker pull yourdockerhubusername/yourimage:latest
+          docker pull chrorou/mostacharibackend:latest
           docker stop myapp || true
-          docker run -d --name myapp -p 80:80 yourdockerhubusername/yourimage:latest
+          docker rm myapp || true
+          docker run -d --name myapp -p 80:80 chrorou/mostacharibackend:latest

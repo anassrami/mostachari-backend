@@ -8,3 +8,4 @@ uvicorn
 fastapi
 fastapi_mail
 passlib
+pytest

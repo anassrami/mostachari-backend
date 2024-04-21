@@ -38,7 +38,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: chrorou/mostacharibackend
-          tags: latest,${{ github.sha }}  # Adding SHA as a tag
+          tags: ${{ github.sha }}  # Adding SHA as a tag
 
       - name: SSH and Deploy to Server
         uses: appleboy/ssh-action@master
@@ -50,4 +50,4 @@ jobs:
             docker pull chrorou/mostacharibackend:${{ github.sha }}
             docker stop myapp || true
             docker rm myapp || true
-            docker run -d --name myapp -p 80:80 chrorou/mostacharibackend:latest,${{ github.sha }}
+            docker run -d --name myapp -p 80:80 chrorou/mostacharibackend:${{ github.sha }}

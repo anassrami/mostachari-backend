@@ -21,6 +21,7 @@ def create_consultation(user_id: str, consultation_data: ConsultationCreate, db:
         "user_id": ObjectId(user_id),
         "category": consultation_data.category,
         "question": consultation_data.question,
+        "title":consultation_data.title,
         "aiResponse": None,  # This would be generated possibly by an AI model or could be added later
         "creationDate": datetime.utcnow(),
         "is_active":1
@@ -38,7 +39,7 @@ def get_user_consultations(user_id: str, db: Collection, page: int, size: int):
     try:
         consultations = list(
             db['consultations']
-            .find({"user_id": ObjectId(user_id),"is_active":1})
+            .find({"user_id": ObjectId(user_id),"is_active":1},{"question": 0})
             .skip(skip_amount)
             .limit(size)
         )

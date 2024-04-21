@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     database_name: str = os.getenv('DATABASE_NAME')
     secret_key: str = os.getenv('API_SECRET_KEY')
     algorithm: str = 'HS256'
-    access_token_expire_minutes: int = 30
+    access_token_expire_minutes: int = 180
 
 
 settings = Settings()

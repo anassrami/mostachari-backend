@@ -33,14 +33,14 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
     - uses: actions/checkout@v2
-
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: chrorou/mostacharibackend
-        tags: latest
+        tags: latest,${{ github.sha }}
+
 
     - name: SSH and Deploy to Server
       uses: appleboy/ssh-action@master
@@ -53,3 +53,4 @@ jobs:
           docker stop myapp || true
           docker rm myapp || true
           docker run -d --name myapp -p 80:80 chrorou/mostacharibackend:latest
+

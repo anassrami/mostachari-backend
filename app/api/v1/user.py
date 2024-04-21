@@ -3,13 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from pymongo.collection import Collection
 
 from app.dependencies import get_database
-from app.schemas.user import User
+from app.schemas.user import UserDetails
 from app.services.user_service import get_user_by_username
 from app.utils.auth_utils import get_current_user
 
 router = APIRouter()
 
-@router.get("/details", response_model=User )
+@router.get("/details", response_model=UserDetails )
 def read_user(username = Depends(get_current_user), db: Collection = Depends(get_database)):
     db_user = get_user_by_username(username.username, db)
     if db_user is None:

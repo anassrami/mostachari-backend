@@ -37,11 +37,9 @@ def login_for_access_token(form_data: LoginData, db: Collection = Depends(get_da
 
     # Prepare user data for response, excluding sensitive information like hashed_password
     user_data = {
-        "id": str(user.id),  # Convert ObjectId to string
         "username": user.username,
         "email": user.email,
         "consultation_balance": user.consultation_balance,  # Provide a default value if key doesn't exist
-        "is_active": user.is_active  # Provide a default value if key doesn't exist
     }
 
     return {

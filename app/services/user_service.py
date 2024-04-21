@@ -1,13 +1,17 @@
 # User management logic
+from datetime import datetime, timedelta
 from typing import Optional
+from jose import JWTError, jwt
+from app.settings import settings
 
 import pymongo
 from pymongo.collection import Collection
 from fastapi import HTTPException, status, Depends
 from app.dependencies import get_database
-from app.schemas.user import User, UserCreate
+from app.schemas.user import User, UserCreate, UserDetails
 from app.security.security import get_password_hash
 from passlib.context import CryptContext
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -28,11 +32,26 @@ def create_user(user: UserCreate, db: Collection = Depends(get_database)):
             detail="Username or email already registered."
         )
     new_user['_id'] = str(new_user['_id'])
-    return new_user
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    user_data ={
+        "username": user.username,
+        "email": user.email,
+        "consultation_balance": 5,
+    }
+    return {
+        "error": False,
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user_data
+    }
+     
 
 
-def get_user_by_username(username: str, db: Collection = Depends(get_database)) -> Optional[User]:
-    user_data = db['users'].find_one({"username": username}, {"_id": 1, "username": 1, "email": 1, "is_active": 1, "consultation_balance": 1, "hashed_password": 1})
+def get_user_by_username(username: str, db: Collection = Depends(get_database)) -> Optional[UserDetails]:
+    user_data = db['users'].find_one({"username": username})
     if user_data:
         user_id = str(user_data.pop('_id'))  # Convert ObjectId to string and remove from user_data
         return User(id=user_id, **user_data)  # Create User instance using the retrieved data
@@ -43,3 +62,13 @@ def get_user_by_email(email: str, db: Collection):
     if user is None:
         return None
     return user
+
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    return encoded_jwt

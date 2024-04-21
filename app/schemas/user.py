@@ -22,7 +22,6 @@ class User(UserBase):
         from_attributes = True
 
 class UserDetails(UserBase):
-    is_active: bool
     consultation_balance: int
     class Config:
         from_attributes = True

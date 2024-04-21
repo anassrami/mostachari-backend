@@ -50,4 +50,4 @@ jobs:
             docker pull chrorou/mostacharibackend:${{ github.sha }}
             docker stop myapp || true
             docker rm myapp || true
-            docker run -d --name myapp -p 80:80 chrorou/mostacharibackend:${{ github.sha }}
+            docker run -d --name myapp -p 80:80 chrorou/mostacharibackend:latest,${{ github.sha }}

@@ -47,7 +47,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            docker pull chrorou/mostacharibackend:${{ github.sha }}
+            docker pull chrorou/mostacharibackend2:latest
             docker stop myapp || true
             docker rm myapp || true
-            docker run -d --name myapp -p 80:80 chrorou/mostacharibackend1:latest
+            docker run -d --name myapp -p 80:80 chrorou/mostacharibackend2:latest

@@ -32,16 +32,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: chrorou/mostacharibackend2
-          tags: latest
+          context: .
+          push: true
+          tags: chrorou/mostacharibackend2:latest
 
       - name: SSH and Deploy to Server
         uses: appleboy/ssh-action@master

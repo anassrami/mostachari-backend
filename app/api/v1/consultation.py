@@ -14,7 +14,7 @@ router = APIRouter()
 def add_consultation(consultation_data: ConsultationCreate, db: Collection = Depends(get_database), current_user = Depends(get_current_user)):
     return create_consultation(current_user.id, consultation_data, db)
 
-@router.patch("/consultation/{id}", response_model=ConsultationID)
+@router.put("/consultation/{id}", response_model=ConsultationID)
 def update_consultation(id :str, db: Collection = Depends(get_database), current_user = Depends(get_current_user)):
     return delete_consultation(id,current_user.id, db)
 

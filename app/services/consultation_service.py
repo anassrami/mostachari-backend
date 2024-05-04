@@ -20,7 +20,7 @@ def is_valid_object_id(id):
 async def create_consultation(user_id: str, consultation_data: ConsultationCreate, db: Collection):
     # Prepare the payload for the POST request
     payload = {
-        "openai_model": "gpt-4-0125-preview",  # Adjust the model name as needed
+        "openai_model": "gpt-3.5-turbo-0125",  # Adjust the model name as needed
         "question": consultation_data.question,
         "categories": consultation_data.category
     }

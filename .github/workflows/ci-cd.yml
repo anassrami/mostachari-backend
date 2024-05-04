@@ -52,7 +52,8 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
+            set -e  # Ensures the script stops on the first error
             docker pull chrorou/mostacharibackend2:latest
-            docker stop myapp || true
-            docker rm myapp || true
-            docker run -d --name myapp -p 80:80 chrorou/mostacharibackend2:latest
+            docker stop myapp || true  # Ignore errors if 'myapp' is not running
+            docker rm myapp || true  # Ignore errors if 'myapp' does not exist
+            docker run -d --restart unless-stopped --name myapp -p 80:80 chrorou/mostacharibackend2:latest

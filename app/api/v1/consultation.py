@@ -1,7 +1,7 @@
 # api/consultation.py
 
 from typing import List
-from fastapi import APIRouter, Depends ,Query
+from fastapi import APIRouter, Depends, HTTPException ,Query
 from pymongo.collection import Collection
 from app.dependencies import get_database
 from app.schemas.Consultation import Consultation, ConsultationCreate, ConsultationID, Consultations
@@ -11,8 +11,13 @@ from app.services.consultation_service import create_consultation, delete_consul
 router = APIRouter()
 
 @router.post("/consultation/create", response_model=ConsultationID)
-def add_consultation(consultation_data: ConsultationCreate, db: Collection = Depends(get_database), current_user = Depends(get_current_user)):
-    return create_consultation(current_user.id, consultation_data, db)
+async def add_consultation(consultation_data: ConsultationCreate, db: Collection = Depends(get_database), current_user = Depends(get_current_user)):
+    try:
+        # Ensure `create_consultation` is awaited
+        consultation = await create_consultation(current_user.id, consultation_data, db)
+        return consultation
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) 
 
 @router.put("/consultation/{id}", response_model=ConsultationID)
 def update_consultation(id :str, db: Collection = Depends(get_database), current_user = Depends(get_current_user)):

@@ -1,6 +1,7 @@
 # app/services/consultation_service.py
 
 from bson import ObjectId
+import requests
 import pymongo
 from fastapi import HTTPException, status
 from pymongo.collection import Collection
@@ -16,23 +17,52 @@ def is_valid_object_id(id):
     except InvalidId:
         return False
     
-def create_consultation(user_id: str, consultation_data: ConsultationCreate, db: Collection):
+async def create_consultation(user_id: str, consultation_data: ConsultationCreate, db: Collection):
+    # Prepare the payload for the POST request
+    payload = {
+        "openai_model": "gpt-4-0125-preview",  # Adjust the model name as needed
+        "question": consultation_data.question,
+        "categories": consultation_data.category
+    }
+
+    # URL of the external API
+    url = "http://167.99.42.224/api/v1/mostachari_text_101/response"
+
+    # Make the POST request using requests
+    response = requests.post(url, json=payload)
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail="Failed to fetch AI response")
+
+    response_data = response.json()
+    print("Response Data:", response_data)  # Debug print
+
+    # Check if there is an error in the response
+    if response_data.get("error"):
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=response_data.get("error_message"))
+
+    # Extract the AI response data
+    data = response_data.get("data", {})
+    aiResponse =  data.get("llm_responce", "No response received")
+    articles_numbers = data.get("articles_numbers", "No response received")
+    # Create the consultation document
     consultation = {
         "user_id": ObjectId(user_id),
         "category": consultation_data.category,
         "question": consultation_data.question,
-        "title":consultation_data.title,
-        "aiResponse": None,  # This would be generated possibly by an AI model or could be added later
+        "title": consultation_data.title,
+        "aiResponse": aiResponse,
+        "articles_numbers" : articles_numbers,
         "creationDate": datetime.utcnow(),
-        "is_active":1
+        "is_active": 1
     }
+
+    # Insert the consultation into the database
     try:
         result = db['consultations'].insert_one(consultation)
         consultation['id'] = str(result.inserted_id)
         return consultation
     except pymongo.errors.PyMongoError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-
 
 def get_user_consultations(user_id: str, db: Collection, page: int, size: int):
     skip_amount = (page - 1) * size

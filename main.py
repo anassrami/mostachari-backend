@@ -48,7 +48,7 @@ app.add_middleware(AuthMiddleware)
 # Including routers
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(user.router, prefix="/api/v1/user", tags=["user"])
-app.include_router(consultation.router, prefix="/api/v1/consultations", tags=["consultations"])
+app.include_router(consultation.router, prefix="/api/v1", tags=["consultations"])
 
 @app.on_event("startup")
 async def startup_event():

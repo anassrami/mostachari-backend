@@ -50,7 +50,7 @@ async def create_consultation(user_id: str, consultation_data: ConsultationCreat
         "category": consultation_data.category,
         "question": consultation_data.question,
         "title": consultation_data.title,
-        "aiResponse": aiResponse,
+        "aiResponse": aiResponse.response,
         "articles_numbers" : articles_numbers,
         "creationDate": datetime.utcnow(),
         "is_active": 1

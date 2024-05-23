@@ -20,13 +20,13 @@ def is_valid_object_id(id):
 async def create_consultation(user_id: str, consultation_data: ConsultationCreate, db: Collection):
     # Prepare the payload for the POST request
     payload = {
-        "openai_model": "gpt-3.5-turbo-0125",  # Adjust the model name as needed
+        "openai_model": "gpt-4o",  # Adjust the model name as needed
         "question": consultation_data.question,
         "categories": consultation_data.category
     }
 
     # URL of the external API
-    url = "http://167.99.42.224/api/v1/mostachari_text_101/response"
+    url = "http://167.99.42.224:8081/api/v1/mostachari_text_101/response"
 
     # Make the POST request using requests
     response = requests.post(url, json=payload)

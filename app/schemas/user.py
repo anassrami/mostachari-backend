@@ -1,11 +1,14 @@
-# User schema
-
 from pydantic import BaseModel, EmailStr, Field
+
+class PasswordReset(BaseModel):
+    oldPassword: str
+    newPassword: str
+    confirmNewPassword: str
 
 class LoginData(BaseModel):
     username: str
     password: str
-    
+
 class UserBase(BaseModel):
     username: str
     email: EmailStr
@@ -18,11 +21,13 @@ class User(UserBase):
     is_active: bool
     consultation_balance: int
     hashed_password: str
+
     class Config:
         from_attributes = True
 
 class UserDetails(UserBase):
     consultation_balance: int
+
     class Config:
         from_attributes = True
 
@@ -30,9 +35,8 @@ class UserRegister(BaseModel):
     username: str
     email: EmailStr
     password: str
-    password_confirmation: str = Field(alias="passwordConfirmation")
+    passwordConfirmation: str = Field(alias="passwordConfirmation")
 
-    # Use a Pydantic validator to ensure that the password and confirmation match
     @classmethod
     def validate_password(cls, values):
         if values.get('password') != values.get('password_confirmation'):

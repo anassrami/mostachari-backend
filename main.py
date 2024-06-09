@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
@@ -17,19 +18,17 @@ db_client = None
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Skip middleware for paths that begin with '/api/v1/auth'
         if not request.url.path.startswith("/api/v1/auth"):
             token = request.headers.get("Authorization")
             if token:
                 try:
-                    token = token.split(" ")[1]  # Assuming Bearer token
+                    token = token.split(" ")[1]
                     payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
                     request.state.user = payload.get("sub")
                 except JWTError:
-                    return Response(status_code=401, content="Invalid token")
+                    return JSONResponse(status_code=401, content={"detail": "Invalid token"})
                 except Exception as e:
-                    return Response(status_code=401, content=str(e))
-
+                    return JSONResponse(status_code=401, content={"detail": str(e)})
         response = await call_next(request)
         return response
 

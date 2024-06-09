@@ -1,9 +1,15 @@
 from pydantic import BaseModel, EmailStr, Field
 
 class PasswordReset(BaseModel):
-    oldPassword: str
     newPassword: str
     confirmNewPassword: str
+
+class PasswordResetLoged(PasswordReset):
+    oldPassword: str
+
+
+class ForgotPassword(BaseModel):
+    email :str
 
 class LoginData(BaseModel):
     username: str

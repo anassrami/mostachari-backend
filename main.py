@@ -26,7 +26,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
                     request.state.user = payload.get("sub")
                 except JWTError:
-                    return JSONResponse(status_code=401, content={"detail": "Invalid token"})
+                    return JSONResponse(status_code=498, content={"detail": "Invalid token"})
                 except Exception as e:
                     return JSONResponse(status_code=401, content={"detail": str(e)})
         response = await call_next(request)

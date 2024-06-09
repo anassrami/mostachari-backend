@@ -75,3 +75,27 @@ def validate_password_strength(password: str):
 
     if errors:
         raise HTTPException(status_code=400, detail=errors)
+
+def get_user_by_email(email: str, db):
+    return db["users"].find_one({"email": email})
+
+def store_password_reset_token(email: str, token: str, db, expires_at: datetime):
+    db["password_reset_tokens"].insert_one({
+        "email": email,
+        "token": token,
+        "expires_at": expires_at,
+        "used": False
+    })
+
+def mark_token_as_used(token: str, db):
+    db["password_reset_tokens"].update_one({"token": token}, {"$set": {"used": True}})
+
+def validate_reset_token(token: str, db):
+    token_data = db["password_reset_tokens"].find_one({"token": token})
+    if not token_data:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
+    if token_data["used"]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token has already been used")
+    if token_data["expires_at"] < datetime.utcnow():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token has expired")
+    return token_data["email"]

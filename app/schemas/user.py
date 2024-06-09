@@ -1,5 +1,13 @@
 from pydantic import BaseModel, EmailStr, Field
 
+class ForgotPassword(BaseModel):
+    email: EmailStr
+
+class ForgotPasswordResponse(BaseModel):
+    message: str
+    detail: str
+    status: int
+    
 class PasswordReset(BaseModel):
     newPassword: str
     confirmNewPassword: str

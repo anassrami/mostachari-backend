@@ -80,7 +80,7 @@ async def forgot_password(request: Request, email: ForgotPassword, db=Depends(ge
 
     db["users"].update_one({"email": email.email}, {"$set": {"reset_token": token}})
 
-    reset_link = f"{request.url_for('reset_password')}?token={token}"
+    reset_link = f"http://localhost:4200/reset?token={token}"
     body = f"Hi, click on the link to reset your password: {reset_link}"
 
     try:

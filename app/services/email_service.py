@@ -1,7 +1,7 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
 conf = ConnectionConfig(
-    MAIL_USERNAME="mostachari@outlook.com",
+    MAIL_USERNAME="moadgmc@outlook.com",
     MAIL_PASSWORD="Nino@123456",
     MAIL_FROM="mostachari@outlook.com",
     MAIL_PORT=587,

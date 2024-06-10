@@ -3,7 +3,7 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 conf = ConnectionConfig(
     MAIL_USERNAME="moadgmc@outlook.com",
     MAIL_PASSWORD="Nino@123456",
-    MAIL_FROM="mostachari@outlook.com",
+    MAIL_FROM="moadgmc@outlook.com",
     MAIL_PORT=587,
     MAIL_SERVER="smtp-mail.outlook.com",
     MAIL_STARTTLS=True,  # Correctly added as per the new model

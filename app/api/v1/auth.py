@@ -77,12 +77,12 @@ async def forgot_password(request: Request, email: ForgotPassword, db=Depends(ge
 
     token_expires = timedelta(minutes=15)
     token = create_access_token(data={"sub": user["email"]}, expires_delta=token_expires)
-    expires_at = datetime.utcnow() + token_expires
-    store_password_reset_token(user["email"], token, db, expires_at)
+
+    db["users"].update_one({"email": email.email}, {"$set": {"reset_token": token}})
 
     reset_link = f"{request.url_for('reset_password')}?token={token}"
     body = f"Hi, click on the link to reset your password: {reset_link}"
-    print(token)
+
     try:
         await send_email(email.email, "Reset Your Password", body)
     except Exception as e:
@@ -112,13 +112,10 @@ async def reset_password(
 
     validate_password_strength(resetPassword.newPassword)
 
-    hashed_password = get_password_hash(pwd_context,resetPassword.newPassword)
-    db["users"].update_one({"email": email}, {"$set": {"hashed_password": hashed_password}})
-
-    mark_token_as_used(token, db)
+    hashed_password = get_password_hash(pwd_context, resetPassword.newPassword)
+    db["users"].update_one({"email": email}, {"$set": {"hashed_password": hashed_password, "reset_token": None}})
 
     return {"message": "Password reset successfully."}
-
 
 @router.post("/loged/reset-password")
 async def reset_password(
@@ -136,7 +133,6 @@ async def reset_password(
         raise HTTPException(status_code=403, detail="Token does not match")
 
     user = get_user_by_username(username, db)
-    print(user.hashed_password)
 
     if not user or not verify_password_service(resetPassword.oldPassword, user.hashed_password):
         raise HTTPException(status_code=400, detail="Old password is incorrect")

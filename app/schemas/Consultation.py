@@ -1,7 +1,7 @@
 from bson import ObjectId
 from pydantic import BaseModel, Field, validator
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 class ConsultationsBase(BaseModel):
     category: List[str]
@@ -11,6 +11,7 @@ class ConsultationBase(BaseModel):
     category: List[str]
     question: str
     title: str
+    lang: str
 
 class Consultations(ConsultationsBase):
     id: str
@@ -39,12 +40,17 @@ class Consultation(ConsultationBase):
         orm_mode = True
         allow_population_by_field_name = True
 
-class ConsultationID(ConsultationBase):
+class ConsultationIDBase(BaseModel):
+    category: List[str]
+    question: str
+    title: str
+
+class ConsultationID(ConsultationIDBase):
     id: str = Field(..., alias='id')
-    aiResponse: Optional[str]
+    aiResponse: Optional[Dict[str, str]] = None
     articles_numbers: List[str] = Field(default_factory=list)
     creationDate: datetime = Field(default_factory=datetime.utcnow)
-    
+
     @validator('id', pre=True, allow_reuse=True)
     def convert_id(cls, v):
         return str(v) if isinstance(v, ObjectId) else v

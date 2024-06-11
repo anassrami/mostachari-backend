@@ -13,11 +13,10 @@ router = APIRouter()
 @router.post("/consultation/create", response_model=ConsultationID)
 async def add_consultation(consultation_data: ConsultationCreate, db: Collection = Depends(get_database), current_user = Depends(get_current_user)):
     try:
-        # Ensure `create_consultation` is awaited
         consultation = await create_consultation(current_user.id, consultation_data, db)
         return consultation
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/consultation/{id}", response_model=ConsultationID)
 def update_consultation(id :str, db: Collection = Depends(get_database), current_user = Depends(get_current_user)):

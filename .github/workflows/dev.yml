@@ -3,10 +3,7 @@ name: CI/CD Pipeline for FastAPI
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - dev
 
 jobs:
   build:
@@ -25,25 +22,28 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # - name: Run tests
+      #   run: pytest  # Assuming you have tests defined
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.NEW_DOCKER_USERNAME }}
+          password: ${{ secrets.NEW_DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
-          tags: chrorou/mostacharibackend2:latest
+          tags: ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari_backend:latest
 
       - name: SSH and Deploy to Server
         uses: appleboy/ssh-action@master
@@ -53,7 +53,7 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             set -e  # Ensures the script stops on the first error
-            docker pull chrorou/mostacharibackend2:latest
+            docker pull ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari_backend:latest
             docker stop myapp || true  # Ignore errors if 'myapp' is not running
             docker rm myapp || true  # Ignore errors if 'myapp' does not exist
-            docker run -d --restart unless-stopped --name myapp -p 80:80 chrorou/mostacharibackend2:latest
+            docker run -d --restart unless-stopped --name myapp -p 80:80 ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari_backend:latest

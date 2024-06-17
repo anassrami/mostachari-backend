@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for FastAPI
+name: DEV CI/CD Pipeline
 
 on:
   push:
@@ -38,12 +38,17 @@ jobs:
           username: ${{ secrets.NEW_DOCKER_USERNAME }}
           password: ${{ secrets.NEW_DOCKER_PASSWORD }}
 
+      - name: Verify Docker Login
+        run: docker info
+        
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           tags: ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari_backend:latest
+
+      
 
       - name: SSH and Deploy to Server
         uses: appleboy/ssh-action@master

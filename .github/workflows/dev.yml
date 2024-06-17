@@ -37,9 +37,9 @@ jobs:
       #   with:
       #     username: ${{ secrets.NEW_DOCKER_USERNAME }}
       #     password: ${{ secrets.NEW_DOCKER_PASSWORD }}
-    - name: Login to Docker Hub
-      run: |
-        echo "${{ secrets.NEW_DOCKER_PASSWORD }}" | docker login -u "${{ secrets.NEW_DOCKER_USERNAME }}" --password-stdin
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.NEW_DOCKER_PASSWORD }}" | docker login -u "${{ secrets.NEW_DOCKER_USERNAME }}" --password-stdin
 
       - name: Verify Docker Login
         run: docker info

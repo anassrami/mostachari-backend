@@ -1,7 +1,8 @@
 # Project documentation
-# To Run App:
-─ uvicorn main:app --reload
-
+# Start application:
+```sh
+uvicorn main:app --reload
+```
 
 ## Setting Up Nginx as a Reverse Proxy with SSL for FastAPI
 

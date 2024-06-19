@@ -36,7 +36,7 @@ This section explains how we set up Nginx as a reverse proxy with SSL terminatio
    ```nginx
    server {
        listen 80;
-       server_name api.dev.mostachari.com;
+       server_name api.dev.mostachari.ma;
 
        location / {
            proxy_pass http://localhost:8000;  # Proxy to the internal port 8000

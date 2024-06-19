@@ -62,4 +62,4 @@ jobs:
             docker pull ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari_backend:latest
             docker stop myapp || true  # Ignore errors if 'myapp' is not running
             docker rm myapp || true  # Ignore errors if 'myapp' does not exist
-            docker run -d --restart unless-stopped --name myapp -p 80:80 ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari_backend:latest
+            docker run -d --restart unless-stopped --name myapp -p 8000:80 ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari_backend:latest

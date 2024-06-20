@@ -42,6 +42,19 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(user.router, prefix="/api/v1/user", tags=["user"])
 app.include_router(consultation.router, prefix="/api/v1", tags=["consultations"])
 
+origins = [
+    "http://152.42.131.144",  # DEV
+    "http://localhost:3000",  # Include localhost for local development
+    "http://localhost",  # Include localhost for local development
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.on_event("startup")
 async def startup_event():
     global db_client
@@ -55,16 +68,3 @@ async def shutdown_event():
     global db_client
     if db_client:
         db_client.close()
-
-origins = [
-    "http://152.42.131.144",  # DEV
-    "http://localhost:3000",  # Include localhost for local development
-    "http://localhost",  # Include localhost for local development
-]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)

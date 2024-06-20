@@ -32,7 +32,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         return response
 
-# Middleware setup
+origins = [
+    "http://152.42.131.144",  # DEV
+    "http://localhost:3000",  # Include localhost for local development
+]
+
+app.add_middleware(AuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -41,8 +46,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Apply the middleware
-app.add_middleware(AuthMiddleware)
+
 
 # Including routers
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])

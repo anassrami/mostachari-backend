@@ -14,17 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from jose import jwt, JWTError
 
 app = FastAPI()
-origins = [
-    "http://152.42.131.144",  # DEV
-    "http://localhost:3000",  # Include localhost for local development
-]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 db_client = None
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -65,3 +55,16 @@ async def shutdown_event():
     global db_client
     if db_client:
         db_client.close()
+
+origins = [
+    "http://152.42.131.144",  # DEV
+    "http://localhost:3000",  # Include localhost for local development
+    "http://localhost",  # Include localhost for local development
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

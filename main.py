@@ -43,6 +43,11 @@ app.include_router(user.router, prefix="/api/v1/user", tags=["user"])
 app.include_router(consultation.router, prefix="/api/v1", tags=["consultations"])
 
 origins = [
+    "https://www.mostachari.ma"
+    "http://www.mostachari.ma"
+    "https://dev.mostachari.ma"
+    "http://dev.mostachari.ma"
+    "https://152.42.131.144"
     "http://152.42.131.144",  # DEV
     "http://localhost:3000",  # Include localhost for local development
     "http://localhost",  # Include localhost for local development

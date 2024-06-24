@@ -15,10 +15,6 @@ class PasswordReset(BaseModel):
 class PasswordResetLoged(PasswordReset):
     oldPassword: str
 
-
-class ForgotPassword(BaseModel):
-    email :str
-
 class LoginData(BaseModel):
     username: str
     password: str
@@ -45,10 +41,7 @@ class UserDetails(UserBase):
     class Config:
         from_attributes = True
 
-class UserRegister(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
+class UserRegister(UserCreate):
     passwordConfirmation: str = Field(alias="passwordConfirmation")
 
     @classmethod

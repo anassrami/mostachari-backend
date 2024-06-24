@@ -1,15 +1,10 @@
-import os
-from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordBearer
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from app.settings import settings
 from app.api.v1 import auth, consultation, user
-from app.dependencies import get_database
-from app.services.auth_service import verify_token
 from starlette.middleware.base import BaseHTTPMiddleware
 from jose import jwt, JWTError
 

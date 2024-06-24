@@ -8,7 +8,7 @@ from pymongo.collection import Collection
 from datetime import datetime
 from bson.errors import InvalidId
 
-from app.schemas.Consultation import Consultation, ConsultationCreate, ConsultationID
+from app.schemas.Consultation import ConsultationBase, ConsultationResponce
 
 
 def is_valid_object_id(id):
@@ -20,7 +20,7 @@ def is_valid_object_id(id):
 
 
 async def create_consultation(
-    user_id: str, consultation_data: ConsultationCreate, db: Collection
+    user_id: str, consultation_data: ConsultationBase, db: Collection
 ):
     payload = {
         "openai_model": "gpt-4o",
@@ -125,7 +125,7 @@ def get_consultation_by_id(id, user_id: str, db: Collection):
                 "_id": str(consultation["_id"]),
             }
             if consultation:
-                return ConsultationID(
+                return ConsultationResponce(
                     **consultation
                 )  # Serialize result into Pydantic model
             else:
@@ -163,7 +163,7 @@ def delete_consultation(id, user_id: str, db: Collection):
             if result:
                 # Make sure to rename _id to id when passing to Pydantic
                 result["id"] = str(result.pop("_id"))
-                return ConsultationID(**result)  # Serialize result into Pydantic model
+                return ConsultationResponce(**result)  # Serialize result into Pydantic model
             else:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,

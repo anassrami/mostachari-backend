@@ -7,12 +7,6 @@ class ConsultationsBase(BaseModel):
     category: List[str]
     title: str
 
-class ConsultationBase(BaseModel):
-    category: List[str]
-    question: str
-    title: str
-    lang: str
-
 class Consultations(ConsultationsBase):
     id: str
     creationDate: datetime = Field(default_factory=datetime.utcnow)
@@ -25,8 +19,11 @@ class Consultations(ConsultationsBase):
         orm_mode = True
         allow_population_by_field_name = True
 
-class ConsultationCreate(ConsultationBase):
-    pass
+class ConsultationBase(BaseModel):
+    category: List[str]
+    title : str
+    question: str
+    lang: str
 
 class Consultation(ConsultationBase):
     id: str
@@ -40,16 +37,12 @@ class Consultation(ConsultationBase):
         orm_mode = True
         allow_population_by_field_name = True
 
-class ConsultationIDBase(BaseModel):
-    category: List[str]
-    question: str
-    title: str
-
-class ConsultationID(ConsultationIDBase):
+class ConsultationResponce(ConsultationsBase):
     id: str = Field(..., alias='id')
     aiResponse: Optional[Dict[str, str]] = None
     articles_numbers: List[str] = Field(default_factory=list)
     creationDate: datetime = Field(default_factory=datetime.utcnow)
+    question: str
 
     @validator('id', pre=True, allow_reuse=True)
     def convert_id(cls, v):

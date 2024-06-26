@@ -62,7 +62,11 @@ def validate_password_strength(password: str):
         errors.append("Password must contain at least one special character")
     if errors:
         raise HTTPException(status_code=400, detail=errors)
-
+    
+def validate_user_role(user_role :str):
+    if not (user_role == "PRO" or user_role == "NORMAL"):
+        raise HTTPException(status_code=400, detail="Role doesn't match")
+    
 def store_password_reset_token(email: str, token: str, db, expires_at: datetime):
     db["password_reset_tokens"].insert_one({
         "email": email,
@@ -83,10 +87,10 @@ def validate_reset_token(token: str, db):
 def generate_login_access_token(form_data: LoginData, db: Collection):
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password", headers={"WWW-Authenticate": "Bearer"})
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"error": True , "message" : "Incorrect username or password"}, headers={"WWW-Authenticate": "Bearer"})
 
     access_token = create_access_token(data={"sub": user.username}, expires_delta=timedelta(minutes=settings.access_token_expire_minutes))
-    user_data = {"username": user.username, "email": user.email, "consultation_balance": user.consultation_balance}
+    user_data = {"username": user.username,"role": user.role, "email": user.email, "consultation_balance": user.consultation_balance}
 
     return {"error": False, "access_token": access_token, "token_type": "bearer", "user": user_data}
 
@@ -94,7 +98,8 @@ def handle_user_registration(user, db):
     if user.password != user.passwordConfirmation:
         raise HTTPException(status_code=400, detail="Confirm password does not match")
     validate_password_strength(user.password)
-    user_data = UserCreate(username=user.username, email=user.email, password=user.password)
+    validate_user_role(user.role)
+    user_data = UserCreate(username=user.username,role=user.role, email=user.email, password=user.password)
     try:
         return create_user(user=user_data, db=db)
     except HTTPException as e:

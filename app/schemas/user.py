@@ -21,6 +21,7 @@ class LoginData(BaseModel):
 
 class UserBase(BaseModel):
     username: str
+    role : str
     email: EmailStr
 
 class UserCreate(UserBase):

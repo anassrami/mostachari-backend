@@ -21,6 +21,7 @@ def create_user(user: UserCreate, db: Collection = Depends(get_database)):
         "username": user.username,
         "email": user.email,
         "hashed_password": hashed_password,
+        "role" : user.role,
         "is_active": True,
         "consultation_balance": 5,
     }
@@ -39,6 +40,7 @@ def create_user(user: UserCreate, db: Collection = Depends(get_database)):
     user_data ={
         "username": user.username,
         "email": user.email,
+        "role" : user.role,
         "consultation_balance": 5,
     }
     return {

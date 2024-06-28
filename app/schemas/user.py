@@ -6,7 +6,6 @@ class ForgotPassword(BaseModel):
 class ForgotPasswordResponse(BaseModel):
     message: str
     detail: str
-    status: int
     
 class PasswordReset(BaseModel):
     newPassword: str

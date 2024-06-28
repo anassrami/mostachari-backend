@@ -9,6 +9,7 @@ from datetime import datetime
 from bson.errors import InvalidId
 
 from app.schemas.Consultation import ConsultationBase, ConsultationResponce
+from app.services.user_service import get_user_by_id
 
 
 def is_valid_object_id(id):
@@ -21,12 +22,16 @@ def is_valid_object_id(id):
 
 async def create_consultation(
     user_id: str, consultation_data: ConsultationBase, db: Collection
-):
+):  
+    
+    user=get_user_by_id(user_id,db)
+    
     payload = {
         "openai_model": "gpt-4o",
         "question": consultation_data.question,
         "categories": consultation_data.category,
-        "output_lang": consultation_data.lang
+        "output_lang": consultation_data.lang,
+        "role" : user.get("role")
     }
 
     url = "http://167.99.42.224:8081/api/v1/mostachari_text_101/response"
@@ -44,8 +49,8 @@ async def create_consultation(
         )
 
     data = response_data.get("data", {})
-    aiResponse = data.get("llm_responce", {"response": "No response received", "output_lang": "No language received"})
-
+    aiResponse = data.get("llm_response", {"response": "No response received", "output_lang": "No language received"})
+    print(data)
     aiResponseText = aiResponse.get("response")
     aiResponseLang = aiResponse.get("output_lang")
 
@@ -61,8 +66,9 @@ async def create_consultation(
         "question": consultation_data.question,
         "title": consultation_data.title,
         "aiResponse": {aiResponseLang: aiResponseText},
-        "articles_numbers": data.get("articles_numbers", []),
+        "articlesData": data.get("articlesData"),
         "creationDate": datetime.utcnow(),
+        "role" : user.get("role"),
         "is_active": 1
     }
 
@@ -75,8 +81,9 @@ async def create_consultation(
             "question": consultation["question"],
             "title": consultation["title"],
             "aiResponse": consultation["aiResponse"],
-            "articles_numbers": consultation["articles_numbers"],
-            "creationDate": consultation["creationDate"]
+            "articlesData": consultation["articlesData"],
+            "creationDate": consultation["creationDate"],
+            "role" :consultation["role"]
         }
     except pymongo.errors.PyMongoError as e:
         raise HTTPException(

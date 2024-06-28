@@ -1,6 +1,7 @@
 # User management logic
 from datetime import datetime, timedelta
 from typing import Optional
+from bson import ObjectId
 from jose import JWTError, jwt
 from app.settings import settings
 
@@ -58,6 +59,17 @@ def get_user_by_username(username: str, db: Collection = Depends(get_database)) 
         user_id = str(user_data.pop('_id'))  # Convert ObjectId to string and remove from user_data
         return User(id=user_id, **user_data)  # Create User instance using the retrieved data
     return None
+
+def get_user_by_id(user_id: str,db):
+    try:
+        # Convert the string ID to ObjectId
+        object_id = ObjectId(user_id)
+    except Exception as e:
+        raise ValueError("Invalid ObjectId format") from e
+    
+    # Fetch the user data from the database
+    user_data = db['users'].find_one({"_id": object_id})
+    return user_data
 
 def get_user_by_email(email: str, db: Collection):
     user = db['users'].find_one({"email": email})

@@ -10,7 +10,7 @@ class ConsultationsBase(BaseModel):
 class Consultations(ConsultationsBase):
     id: str
     creationDate: datetime = Field(default_factory=datetime.utcnow)
-
+    role : str
     @validator('id', pre=True, allow_reuse=True)
     def convert_id(cls, v):
         return str(v) if isinstance(v, ObjectId) else v
@@ -40,9 +40,10 @@ class Consultation(ConsultationBase):
 class ConsultationResponce(ConsultationsBase):
     id: str = Field(..., alias='id')
     aiResponse: Optional[Dict[str, str]] = None
-    articles_numbers: List[str] = Field(default_factory=list)
+    articlesData: dict
     creationDate: datetime = Field(default_factory=datetime.utcnow)
     question: str
+    role: str
 
     @validator('id', pre=True, allow_reuse=True)
     def convert_id(cls, v):

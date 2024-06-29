@@ -1,9 +1,12 @@
 # User management logic
 from datetime import datetime, timedelta
+import random
 import re
+import string
 from typing import Optional
 from bson import ObjectId
 from jose import JWTError, jwt
+from app.services.email_service import send_email
 from app.settings import settings
 
 import pymongo
@@ -167,6 +170,32 @@ def user_change_mail(user,  db ,email):
         )
     return result
         
+async def send_validation_code(user, db):
+    validationCode = generate_6_digit_code()
+    print(validationCode)
+
+    query = {
+        "_id": ObjectId(user.id),
+        "is_active": True
+    }
+    update = {
+        "$set": {"validationCode": validationCode, "validationCodeAttempt": 3}
+    }
+
+    db["users"].find_one_and_update(query, update, return_document=pymongo.ReturnDocument.AFTER)
+    body = f"Validation Code : {validationCode}"
+    print(user.email)
+    try:
+        await send_email(user.email, "Reset Your Password", body)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send email")
+
+    return {"message": "email sent successfully"}
+
+def generate_6_digit_code():
+    """Generate a secure 6-digit numerical code."""
+    return ''.join(random.choices(string.digits, k=6))
+
 def validate_email(email):
     regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if not re.match(regex, email):

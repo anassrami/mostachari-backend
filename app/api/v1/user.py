@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pymongo.collection import Collection
 
 from app.dependencies import get_database
-from app.schemas.user import ChangeMail, ChangeRole, UserDetails
-from app.services.user_service import send_validation_code, user_change_mail, user_change_role
+from app.schemas.user import ChangeMail, ChangeRole, UserDetails, VerifyMail
+from app.services.user_service import send_validation_code, user_change_mail, user_change_role, verify_validation_code
 from app.utils.auth_utils import get_current_user
 
 router = APIRouter()
@@ -32,3 +32,9 @@ async def read_user(user = Depends(get_current_user), db: Collection = Depends(g
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return await send_validation_code(user, db)
+
+@router.post("/verifyValidationCode")
+def read_user(verifyObject: VerifyMail ,user = Depends(get_current_user), db: Collection = Depends(get_database)):
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return verify_validation_code(user, db , verifyObject)

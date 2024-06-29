@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 
 class ForgotPassword(BaseModel):
@@ -62,3 +63,6 @@ class ChangeRole(BaseModel):
 
 class ChangeMail(BaseModel):
     email :str
+
+class VerifyMail(BaseModel):
+    code :str

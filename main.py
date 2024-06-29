@@ -54,9 +54,18 @@ app.add_middleware(
 
 @app.exception_handler(HTTPException)
 async def custom_http_exception_handler(request, exc: HTTPException):
+    status_code = exc.status_code
+    detail = exc.detail
+    
+    # Check if detail starts with a status code followed by ":"
+    if isinstance(detail, str) and ":" in detail:
+        error_message = detail.split(":", 1)[1].strip()  # Remove the status code prefix and leading spaces
+    else:
+        error_message = str(detail)  # Fallback to string representation if not formatted as expected
+    
     return JSONResponse(
-        status_code=exc.status_code,
-        content={"error": True , "message" : exc.detail}
+        status_code=status_code,
+        content={"error": True, "message": error_message}
     )
 
 @app.on_event("startup")

@@ -101,7 +101,7 @@ def generate_login_access_token(form_data: LoginData, db: Collection):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"error": True , "message" : "Incorrect username or password"}, headers={"WWW-Authenticate": "Bearer"})
 
     access_token = create_access_token(data={"sub": user.username}, expires_delta=timedelta(minutes=settings.access_token_expire_minutes))
-    user_data = {"username": user.username,"role": user.role, "email": user.email, "consultation_balance": user.consultation_balance}
+    user_data = {"username": user.username,"role": user.role, "email": user.email, "consultation_balance": user.consultation_balance, "is_valid" : user.is_valid, "phoneNumber":user.phoneNumber}
 
     return {"error": False, "access_token": access_token, "token_type": "bearer", "user": user_data}
 

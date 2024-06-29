@@ -59,3 +59,6 @@ class AccountValidityResponse(UserCreate):
 
 class ChangeRole(BaseModel):
     role :str
+
+class ChangeMail(BaseModel):
+    email :str

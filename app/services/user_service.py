@@ -1,5 +1,6 @@
 # User management logic
 from datetime import datetime, timedelta
+import re
 from typing import Optional
 from bson import ObjectId
 from jose import JWTError, jwt
@@ -123,5 +124,50 @@ def user_change_role(user,  db ,role):
             detail="User not found or is not active."
         )
 
+
+def user_change_mail(user,  db ,email):
+
+    validate_email(email)
+
+    if user.email == email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You're already using the same email."
+        )
+
+    if not isinstance(db, pymongo.database.Database):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database object is not valid."
+        )
+    
+    check_email = db["users"].find_one({
+        "email":email
+    })
+
+    if check_email:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Email already exist"
+        )
+    
+    query = {
+        "_id": ObjectId(user.id),
+        "is_active": True
+    }
+    update = {
+        "$set": {"email": email, "is_valid" : False}
+    }
+    result = db["users"].find_one_and_update(query, update, return_document=pymongo.ReturnDocument.AFTER)
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found or is not active."
+        )
     return result
         
+def validate_email(email):
+    regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(regex, email):
+        raise HTTPException(status_code=400, detail=f"Invalid email format: {email}")

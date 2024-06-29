@@ -30,6 +30,8 @@ def create_user(user: UserCreate, db: Collection = Depends(get_database)):
         "is_active": True,
         "phoneNumber" : user.phoneNumber,
         "is_valid" : user.is_valid,
+        "validationCode": "",
+        "validationCodeAttempt": 0,
         "consultation_balance": 5,
     }
     try:
@@ -191,6 +193,44 @@ async def send_validation_code(user, db):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send email")
 
     return {"message": "email sent successfully"}
+
+def verify_validation_code(user,  db , verifyObject):
+    verify_email = db["users"].find_one({
+        "email":user.email
+    })
+    
+    if not verify_email.get("validationCodeAttempt") :
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Email Not Sended or Appempt max")
+    
+    
+    if(verify_email.get("validationCodeAttempt") <= 0):
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Fail Attempt")
+
+
+    if(verify_email.get("validationCode") == verifyObject.code):
+        query = {
+            "_id": ObjectId(user.id),
+            "is_active": True
+        }
+        update = {
+            "$set": {"validationCode": "", "validationCodeAttempt": None ,"is_valid":True}
+        }
+
+        db["users"].find_one_and_update(query, update, return_document=pymongo.ReturnDocument.AFTER)
+
+    else :
+
+        query = {
+            "_id": ObjectId(user.id),
+            "is_active": True
+        }
+        update = {
+            "$set": {"validationCodeAttempt": verify_email.get("validationCodeAttempt")-1}
+        }
+        db["users"].find_one_and_update(query, update, return_document=pymongo.ReturnDocument.AFTER)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="code doesn't match")
+
+    return {"message" : "email verified successfully"}
 
 def generate_6_digit_code():
     """Generate a secure 6-digit numerical code."""

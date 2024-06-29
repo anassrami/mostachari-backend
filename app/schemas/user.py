@@ -21,12 +21,16 @@ class LoginData(BaseModel):
 class UserBase(BaseModel):
     username: str
     role : str
+    phoneNumber : str
     email: EmailStr
+
+class AccountValidity(UserBase):
+    is_valid : bool
 
 class UserCreate(UserBase):
     password: str
 
-class User(UserBase):
+class User(AccountValidity):
     id: str
     is_active: bool
     consultation_balance: int
@@ -35,7 +39,7 @@ class User(UserBase):
     class Config:
         from_attributes = True
 
-class UserDetails(UserBase):
+class UserDetails(AccountValidity):
     consultation_balance: int
 
     class Config:
@@ -49,6 +53,9 @@ class UserRegister(UserCreate):
         if values.get('password') != values.get('password_confirmation'):
             raise ValueError("Passwords do not match")
         return values
+    
+class AccountValidityResponse(UserCreate):
+    is_valid : bool
 
 class ChangeRole(BaseModel):
     role :str

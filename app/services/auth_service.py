@@ -5,7 +5,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException, status, logger
 
-from app.schemas.user import ForgotPasswordResponse, LoginData, UserCreate
+from app.schemas.user import AccountValidity, AccountValidityResponse, ForgotPasswordResponse, LoginData, UserCreate
 from app.services.email_service import send_email
 from app.settings import settings
 from app.security.security import get_password_hash, verify_password
@@ -63,6 +63,17 @@ def validate_password_strength(password: str):
     if errors:
         raise HTTPException(status_code=400, detail=errors)
     
+def validate_email(email):
+    regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(regex, email):
+        raise HTTPException(status_code=400, detail=f"Invalid email format: {email}")
+
+def validate_moroccan_phone_number(phone_number):
+    pattern = re.compile(r"^(?:\+212|0)(?:5[0-9]{8}|6[0-9]{8}|7[0-9]{8})$")
+    if not pattern.match(phone_number):
+        raise HTTPException(status_code=400, detail=f"Invalid Moroccan phone number format: {phone_number}")
+
+    
 def validate_user_role(user_role :str):
     if not (user_role == "PRO" or user_role == "NORMAL"):
         raise HTTPException(status_code=400, detail="Role doesn't match")
@@ -97,9 +108,13 @@ def generate_login_access_token(form_data: LoginData, db: Collection):
 def handle_user_registration(user, db):
     if user.password != user.passwordConfirmation:
         raise HTTPException(status_code=400, detail="Confirm password does not match")
+    
     validate_password_strength(user.password)
     validate_user_role(user.role)
-    user_data = UserCreate(username=user.username,role=user.role, email=user.email, password=user.password)
+    validate_email(user.email)
+    validate_moroccan_phone_number(user.phoneNumber)
+
+    user_data = AccountValidityResponse(username=user.username,is_valid=False,phoneNumber=user.phoneNumber,role=user.role, email=user.email, password=user.password)
     try:
         return create_user(user=user_data, db=db)
     except HTTPException as e:

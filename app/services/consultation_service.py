@@ -50,7 +50,7 @@ async def create_consultation(
 
     data = response_data.get("data", {})
     aiResponse = data.get("llm_response", {"response": "No response received", "output_lang": "No language received"})
-    print(data)
+
     aiResponseText = aiResponse.get("response")
     aiResponseLang = aiResponse.get("output_lang")
 

@@ -49,3 +49,6 @@ class UserRegister(UserCreate):
         if values.get('password') != values.get('password_confirmation'):
             raise ValueError("Passwords do not match")
         return values
+
+class ChangeRole(BaseModel):
+    role :str

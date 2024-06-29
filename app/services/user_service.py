@@ -86,3 +86,38 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt
+
+def user_change_role(user,  db ,role):
+
+    if not (role == "PRO" or role == "NORMAL"):
+        raise HTTPException(status_code=400, detail="Role doesn't match")
+    
+    if user.role == role:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You're already using the same role."
+        )
+
+    if not isinstance(db, pymongo.database.Database):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database object is not valid."
+        )
+
+    query = {
+        "_id": ObjectId(user.id),
+        "is_active": True
+    }
+    update = {
+        "$set": {"role": role}
+    }
+    result = db["users"].find_one_and_update(query, update, return_document=pymongo.ReturnDocument.AFTER)
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found or is not active."
+        )
+
+    return result
+        

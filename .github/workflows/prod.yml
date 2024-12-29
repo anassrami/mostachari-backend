@@ -46,7 +46,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari_backend_prod:latest
+          tags: ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
 
       
 
@@ -59,7 +59,7 @@ jobs:
           script: |
             set -e  # Ensures the script stops on the first error
             docker login -u ${{ secrets.NEW_DOCKER_USERNAME }} -p ${{ secrets.NEW_DOCKER_PASSWORD }}
-            docker pull ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari_backend_prod:latest
+            docker pull ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
             docker stop myapp || true  # Ignore errors if 'myapp' is not running
             docker rm myapp || true  # Ignore errors if 'myapp' does not exist
-            docker run -d --restart unless-stopped --name myapp -p 8000:80 ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari_backend_prod:latest
+            docker run -d --restart unless-stopped --name myapp -p 8000:80 ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest

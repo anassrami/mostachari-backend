@@ -42,7 +42,12 @@ origins = [
     "http://152.42.131.144",  # DEV
     "http://localhost:3000",  # Include localhost for local development
     "http://localhost",  # Include localhost for local development
-    "https://dev.mostachari.ma"  # Include the new website
+    "https://dev.mostachari.ma",  # Include the new website
+    "https://mostachari.ma",  # Include the new website
+    "http://mostachari.ma",  # Include the new website
+    "http://68.183.7.69",
+    "http://68.183.7.69",
+    
 ]
 app.add_middleware(
     CORSMiddleware,

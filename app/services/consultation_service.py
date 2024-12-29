@@ -34,7 +34,7 @@ async def create_consultation(
         "role" : user.get("role")
     }
 
-    url = "http://167.99.42.224:8081/api/v1/mostachari_text_101/response"
+    url = "http://167.71.66.203:8081/api/v1/mostachari_text_101/response"
     response = requests.post(url, json=payload)
     if response.status_code != 200:
         raise HTTPException(

@@ -1,20 +1,36 @@
-# Use an official Python runtime as a parent image
-FROM python:3.8-slim
+############################
+# Stage 1: Build the app
+############################
+FROM python:3.8-slim as builder
 
-# Set the working directory in the container
 WORKDIR /app
-
-# Copy the current directory contents into the container at /app
-COPY . /app
-
-# Install any needed packages specified in requirements.txt
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
+COPY . /app
 
-# Define environment variable
-# ENV NAME World
+############################
+# Stage 2: NGINX + Python
+############################
+FROM nginx:alpine
 
-# Run app.py when the container launches
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+# Install Python so we can run Uvicorn here
+RUN apk add --no-cache python3 py3-pip
+
+# Copy code from builder
+COPY --from=builder /app /app
+WORKDIR /app
+
+# Reinstall dependencies in the final image
+COPY requirements.txt /app
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy your NGINX config
+COPY nginx/prod.nginx.conf /etc/nginx/nginx.conf
+
+# Expose HTTP + HTTPS
+EXPOSE 80 443
+
+# Run Uvicorn in background, then keep NGINX in foreground
+CMD uvicorn main:app --host 0.0.0.0 --port 8000 & \
+    nginx -g 'daemon off;'

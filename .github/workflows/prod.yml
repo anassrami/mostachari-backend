@@ -25,41 +25,35 @@ jobs:
       # - name: Run tests
       #   run: pytest  # Assuming you have tests defined
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+deploy:
+  needs: build
+  runs-on: ubuntu-latest
+  steps:
+    - name: SSH and Deploy to Server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP_PROD }}
+        username: ${{ secrets.SERVER_USERNAME_PROD }}
+        password: ${{ secrets.SERVER_PASSWORD_PROD }}
+        script: |
+          set -e
+          docker login -u ${{ secrets.NEW_DOCKER_USERNAME }} -p ${{ secrets.NEW_DOCKER_PASSWORD }}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.NEW_DOCKER_USERNAME }}
-          password: ${{ secrets.NEW_DOCKER_PASSWORD }}
+          # Stop anything on 80/443
+          docker stop $(docker ps -q --filter "ancestor=nginx") || true
+          sudo lsof -t -i:80 -sTCP:LISTEN | xargs -r sudo kill -9 || true
+          sudo lsof -t -i:443 -sTCP:LISTEN | xargs -r sudo kill -9 || true
 
-      - name: Verify Docker Login
-        run: docker info
-        
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
+          # Pull latest
+          docker pull ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
 
-      
+          # Stop/remove old container
+          docker stop backend-prod-container || true
+          docker rm backend-prod-container || true
 
-      - name: SSH and Deploy to Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_IP_PROD }}
-          username: ${{ secrets.SERVER_USERNAME_PROD }}
-          password: ${{ secrets.SERVER_PASSWORD_PROD }}
-          script: |
-            set -e  # Ensures the script stops on the first error
-            docker login -u ${{ secrets.NEW_DOCKER_USERNAME }} -p ${{ secrets.NEW_DOCKER_PASSWORD }}
-            docker pull ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
-            docker stop myapp || true  # Ignore errors if 'myapp' is not running
-            docker rm myapp || true  # Ignore errors if 'myapp' does not exist
-            docker run -d --restart unless-stopped --name myapp -p 8000:80 ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
+          # Run container with cert volume + ports 80 & 443
+          docker run -d --restart unless-stopped \
+            --name backend-prod-container \
+            -p 80:80 -p 443:443 \
+            -v /etc/letsencrypt:/etc/letsencrypt \
+            ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest

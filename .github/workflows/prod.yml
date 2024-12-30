@@ -25,35 +25,35 @@ jobs:
       # - name: Run tests
       #   run: pytest  # Assuming you have tests defined
 
-deploy:
-  needs: build
-  runs-on: ubuntu-latest
-  steps:
-    - name: SSH and Deploy to Server
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SERVER_IP_PROD }}
-        username: ${{ secrets.SERVER_USERNAME_PROD }}
-        password: ${{ secrets.SERVER_PASSWORD_PROD }}
-        script: |
-          set -e
-          docker login -u ${{ secrets.NEW_DOCKER_USERNAME }} -p ${{ secrets.NEW_DOCKER_PASSWORD }}
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP_PROD }}
+          username: ${{ secrets.SERVER_USERNAME_PROD }}
+          password: ${{ secrets.SERVER_PASSWORD_PROD }}
+          script: |
+            set -e
+            docker login -u ${{ secrets.NEW_DOCKER_USERNAME }} -p ${{ secrets.NEW_DOCKER_PASSWORD }}
 
-          # Stop anything on 80/443
-          docker stop $(docker ps -q --filter "ancestor=nginx") || true
-          sudo lsof -t -i:80 -sTCP:LISTEN | xargs -r sudo kill -9 || true
-          sudo lsof -t -i:443 -sTCP:LISTEN | xargs -r sudo kill -9 || true
+            # Stop anything on 80/443
+            docker stop $(docker ps -q --filter "ancestor=nginx") || true
+            sudo lsof -t -i:80 -sTCP:LISTEN | xargs -r sudo kill -9 || true
+            sudo lsof -t -i:443 -sTCP:LISTEN | xargs -r sudo kill -9 || true
 
-          # Pull latest
-          docker pull ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
+            # Pull latest
+            docker pull ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
 
-          # Stop/remove old container
-          docker stop backend-prod-container || true
-          docker rm backend-prod-container || true
+            # Stop/remove old container
+            docker stop backend-prod-container || true
+            docker rm backend-prod-container || true
 
-          # Run container with cert volume + ports 80 & 443
-          docker run -d --restart unless-stopped \
-            --name backend-prod-container \
-            -p 80:80 -p 443:443 \
-            -v /etc/letsencrypt:/etc/letsencrypt \
-            ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
+            # Run container with cert volume + ports 80 & 443
+            docker run -d --restart unless-stopped \
+              --name backend-prod-container \
+              -p 80:80 -p 443:443 \
+              -v /etc/letsencrypt:/etc/letsencrypt \
+              ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest

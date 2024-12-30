@@ -9,12 +9,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
+
 ############################
 # Stage 2: NGINX + Python
 ############################
 FROM nginx:alpine
 
-# Install Python so we can run Uvicorn here
+# Install Python so we can run Uvicorn
 RUN apk add --no-cache python3 py3-pip
 
 # Copy code from builder

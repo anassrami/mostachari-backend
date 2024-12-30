@@ -22,8 +22,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # If you have tests, uncomment the below:
       # - name: Run tests
-      #   run: pytest  # Assuming you have tests defined
+      #   run: pytest
+
+      - name: Docker Build & Push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
 
   deploy:
     needs: build
@@ -37,21 +45,22 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD_PROD }}
           script: |
             set -e
+            echo "Logging in to Docker..."
             docker login -u ${{ secrets.NEW_DOCKER_USERNAME }} -p ${{ secrets.NEW_DOCKER_PASSWORD }}
 
-            # Stop anything on 80/443
+            echo "Stopping anything on ports 80/443..."
             docker stop $(docker ps -q --filter "ancestor=nginx") || true
             sudo lsof -t -i:80 -sTCP:LISTEN | xargs -r sudo kill -9 || true
             sudo lsof -t -i:443 -sTCP:LISTEN | xargs -r sudo kill -9 || true
 
-            # Pull latest
+            echo "Pulling latest image..."
             docker pull ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest
 
-            # Stop/remove old container
+            echo "Stopping/removing old container..."
             docker stop backend-prod-container || true
             docker rm backend-prod-container || true
 
-            # Run container with cert volume + ports 80 & 443
+            echo "Running new container with cert volume + ports 80 and 443..."
             docker run -d --restart unless-stopped \
               --name backend-prod-container \
               -p 80:80 -p 443:443 \

@@ -62,5 +62,7 @@ jobs:
             docker run -d --restart unless-stopped \
               --name backend-prod-container \
               -p 80:80 -p 443:443 \
+              -p 8000:8000 \
               -v /etc/letsencrypt:/etc/letsencrypt \
+              --network host \
               ${{ secrets.NEW_DOCKER_USERNAME }}/mostachari-backend-latest:latest

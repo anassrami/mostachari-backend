@@ -25,5 +25,4 @@ COPY nginx/prod.nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80 443
 
-CMD uvicorn main:app --host 0.0.0.0 --port 8000 & \
-    nginx -g 'daemon off;'
+CMD /app/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'

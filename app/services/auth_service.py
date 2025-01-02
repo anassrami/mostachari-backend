@@ -144,8 +144,7 @@ def generate_login_access_token(form_data: LoginData, db: Collection):
         "role": user.role,
         "email": user.email,
         "consultation_balance": user.consultation_balance,
-        # disabling user validity check for now
-        "is_valid": True,
+        "is_valid": user.is_valid,
         "phoneNumber": user.phoneNumber,
     }
 
@@ -168,7 +167,8 @@ def handle_user_registration(user, db):
 
     user_data = AccountValidityResponse(
         username=user.username,
-        is_valid=False,
+        # disabling user validity check for now
+        is_valid=True,
         phoneNumber=user.phoneNumber,
         role=user.role,
         email=user.email,
